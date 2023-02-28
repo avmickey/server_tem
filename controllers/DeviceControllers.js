@@ -6,10 +6,10 @@ const {
   Type,
   Rating,
   DeviceImg,
-  BasketDevice,
-  FavoriteDevice,
-  Comment,
+  User,
 } = require('../models/mapping');
+const fs = require('fs');
+const path = require('path');
 
 class DeviceControllers {
   async getAllBrandOrType(req, res, next) {
@@ -260,14 +260,21 @@ class DeviceControllers {
         brandId,
         typeId,
         colorId,
-        info,
+        info = '',
         sale,
         change = false,
       } = req.body;
-      const device = await Device.findByPk(id);
+      let device = await Device.findOne({
+        where: {
+          id,
+        },
+      });
+      const user = await User.findOne({
+        where: { id: req.signedCookies.userId },
+      });
 
-      if (device.change || change) {
-        const device = await Device.update(
+      if (device.change || change || user.role == 'Admin') {
+        device = await Device.update(
           {
             name,
             price,
@@ -278,10 +285,10 @@ class DeviceControllers {
             info,
           },
           {
-            where: id,
+            where: { id },
           }
         );
-        return res.json(device);
+        return res.json({ device, message: 'ok' });
       } else {
         return next(APIError.badRequest('product will not be cahnge'));
       }
@@ -294,13 +301,35 @@ class DeviceControllers {
     try {
       const { id, change = false } = req.params;
 
+      let user;
+      if (req.signedCookies.userId) {
+        user = await User.findOne({
+          where: { id: req.signedCookies.userId },
+        });
+      }
       if (!id) {
         throw new Error('Не указан id пользователя');
       }
-      const device = await Device.findByPk(id);
-      if (device.change || change) {
+      const device = await Device.findOne({
+        where: {
+          id,
+        },
+      });
+
+      if (device.change || change || user?.role == 'Admin') {
         if (!device) {
           throw new Error('Товар не найден в БД');
+        }
+
+        const image = await DeviceImg.findOne({
+          where: { id: device.deviceimgId },
+        });
+
+        image.destroy();
+        for (const [key, value] of Object.entries(JSON.parse(image.img))) {
+          if (value) {
+            fs.unlinkSync(path.resolve(__dirname, '..', 'static', value));
+          }
         }
         await device.destroy({ truncate: true, cascade: false });
 

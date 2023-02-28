@@ -106,8 +106,15 @@ class CommetControllers {
     try {
       const { commentId, userId } = req.params;
       let comment;
-      if (req.signedCookies.userId == userId) {
-        comment = await Comment.destroy({ where: { id: commentId } });
+      const user = await User.findOne({
+        where: { id: req.signedCookies.userId },
+      });
+      if (req.signedCookies.userId == userId || user.role == 'Admin') {
+        comment = await Comment.destroy({
+          where: { id: commentId },
+          truncate: true,
+          cascade: false,
+        });
       } else {
         return next(APIError.badRequest('not found cookies'));
       }

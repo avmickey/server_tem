@@ -1,5 +1,5 @@
 const APIError = require('../errors/APIError');
-const { DeviceImg, Device } = require('../models/mapping');
+const { DeviceImg, Device, User } = require('../models/mapping');
 const uuid = require('uuid');
 const path = require('path');
 const fs = require('fs');
@@ -35,9 +35,11 @@ class ImageControllers {
   }
   async change(req, res, next) {
     try {
-      const { id, img } = req.body;
+      const { id, img, change = false } = req.body;
       const obj = {};
-
+      const user = await User.findOne({
+        where: { id: req.signedCookies.userId },
+      });
       const files = req.files;
       const device = await Device.findOne({
         where: {
@@ -51,69 +53,95 @@ class ImageControllers {
         ],
       });
 
-      const image = await DeviceImg.findOne({
-        where: { id: device.deviceimg.id },
-      });
+      if (device.change || change || user.role == 'Admin') {
+        const image = await DeviceImg.findOne({
+          where: { id: device.deviceimgId },
+        });
 
-      let arr;
+        const imgArr = Object.entries(JSON.parse(img));
 
-      for (const [key, value] of Object.entries(JSON.parse(img))) {
-        arr = Array.from(Object.entries(JSON.parse(image.img))).filter(
-          (item) => {
-            return item[0] != key;
+        let arr = [];
+
+        for (const [key, value] of Object.entries(JSON.parse(image.img))) {
+          if (Array.from(imgArr).length > 0) {
+            const preve = Array.from(imgArr).reduce((pre, item) => {
+              if (key != item[0] && pre != 1) {
+                pre = value;
+              } else {
+                pre = 1;
+              }
+              return pre;
+            }, 0);
+
+            if (preve == 1) {
+              obj[key] = value;
+            } else {
+              arr.push(preve);
+            }
+          } else {
+            arr.push(value);
           }
-        );
-        obj[key] = value;
-      }
-
-      arr.map((item) =>
-        fs.unlinkSync(path.resolve(__dirname, '..', 'static', item[1]))
-      );
-
-      if (files && files.length != 0) {
-        for (const [key, value] of Object.entries(files)) {
-          const filename = uuid.v4() + '.png';
-          value.mv(path.resolve(__dirname, '..', 'static', filename));
-          obj[value.name] = filename;
         }
+
+        if (arr.length > 0) {
+          arr.map((item) =>
+            fs.unlinkSync(path.resolve(__dirname, '..', 'static', item))
+          );
+        }
+        if (files && files.length != 0) {
+          for (const [key, value] of Object.entries(files)) {
+            const filename = uuid.v4() + '.png';
+            value.mv(path.resolve(__dirname, '..', 'static', filename));
+            obj[value.name] = filename;
+          }
+        }
+
+        await image.update({ img: JSON.stringify(obj) });
+        return res.json(image);
+      } else {
+        return next(APIError.badRequest('product will not be cahnge'));
       }
-
-      await image.update({ img: JSON.stringify(obj) });
-
-      return res.json(image);
     } catch (error) {
       return next(APIError.badRequest(error.message));
     }
   }
-  async delete(req, res, next) {
-    try {
-      const { id } = req.params;
-      const device = await Device.findOne({
-        where: {
-          id,
-        },
-        include: [
-          {
-            model: DeviceImg,
-            as: 'deviceimg',
-          },
-        ],
-      });
-      const image = await DeviceImg.findOne({
-        where: { id: device.deviceimg.id },
-      });
-      image.destroy();
-      for (const [key, value] of Object.entries(JSON.parse(image.img))) {
-        if (value) {
-          fs.unlinkSync(path.resolve(__dirname, '..', 'static', value));
-        }
-      }
+  //   async delete(req, res, next) {
+  //     try {
+  //       const { id } = req.params;
 
-      return res.json(image);
-    } catch (error) {
-      return next(APIError.badRequest(error.message));
-    }
-  }
+  //       const device = await Device.findOne({
+  //         where: {
+  //           id,
+  //         },
+  //         include: [
+  //           {
+  //             model: DeviceImg,
+  //             as: 'deviceimg',
+  //           },
+  //         ],
+  //       });
+  //       const user = await User.findOne({
+  //         where: { id: req.signedCookies.userId },
+  //       });
+  //       if (device.change || change || user.role == 'Admin') {
+  //         const image = await DeviceImg.findOne({
+  //           where: { id: device.deviceimg.id },
+  //         });
+  //         image.destroy();
+  //         for (const [key, value] of Object.entries(JSON.parse(image.img))) {
+  //           if (value) {
+  //             fs.unlinkSync(path.resolve(__dirname, '..', 'static', value));
+  //           }
+  //         }
+
+  //         return res.json(image);
+  //       } else {
+  //         return next(APIError.badRequest('product will not be cahnge'));
+  //       }
+  //     } catch (error) {
+  //       return next(APIError.badRequest(error.message));
+  //     }
+  //   }
 }
 
 module.exports = new ImageControllers();

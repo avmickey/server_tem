@@ -52,9 +52,9 @@ class UserControllers {
       res.cookie('userId', user.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json({ message: 'Ok', token, user });
     } catch (e) {
@@ -83,9 +83,9 @@ class UserControllers {
       res.cookie('userId', user.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json({ message: 'Ok', token, user });
     } catch (e) {
@@ -204,9 +204,9 @@ class UserControllers {
       res.cookie('userId', user.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json({ token, user });
     } else {

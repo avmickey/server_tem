@@ -20,9 +20,9 @@ class FAvoriteControllers {
       res.cookie('favoriteId', favorite.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json(favorite);
     } catch (e) {
@@ -44,9 +44,9 @@ class FAvoriteControllers {
       res.cookie('favoriteId', favorite.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json(favorite);
     } catch (e) {
@@ -68,9 +68,9 @@ class FAvoriteControllers {
       res.cookie('favoriteId', favorite.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json(favorite);
     } catch (e) {

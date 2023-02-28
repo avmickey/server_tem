@@ -76,9 +76,9 @@ class UserFilesControllers {
       res.cookie('userId', user.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json({ token, user });
     } else {

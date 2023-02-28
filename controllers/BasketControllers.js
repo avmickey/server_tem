@@ -17,9 +17,9 @@ class BasketControllers {
       res.cookie('basketId', basket.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json(basket);
     } catch (e) {
@@ -40,9 +40,9 @@ class BasketControllers {
       res.cookie('basketId', basket.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json(basket);
     } catch (e) {
@@ -63,9 +63,9 @@ class BasketControllers {
       res.cookie('basketId', basket.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json(basket);
     } catch (e) {
@@ -86,9 +86,9 @@ class BasketControllers {
       res.cookie('basketId', basket.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json(basket);
     } catch (e) {
@@ -108,9 +108,9 @@ class BasketControllers {
       res.cookie('basketId', basket.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json(basket);
     } catch (e) {
@@ -130,9 +130,9 @@ class BasketControllers {
       res.cookie('basketId', basket.id, {
         maxAge,
         signed: true,
-        sameSite: 'Strict',
+        // sameSite: 'Strict',
 
-        secure: true,
+        //    secure: true,
       });
       res.json(basket);
     } catch (e) {
